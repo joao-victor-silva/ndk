@@ -11,6 +11,8 @@ use std::{
     ptr::NonNull,
 };
 
+use jni_sys::{jobject, JNIEnv};
+
 /// A native [`AAssetManager *`]
 ///
 /// [`AAssetManager *`]: https://developer.android.com/ndk/reference/group/asset#aassetmanager
@@ -38,6 +40,12 @@ impl AssetManager {
     /// Returns the pointer to the native `AAssetManager`.
     pub fn ptr(&self) -> NonNull<ffi::AAssetManager> {
         self.ptr
+    }
+
+    /// Returns the [`AssetManager`] object associated with the supplied
+    pub unsafe fn from_java(env: *mut JNIEnv, asset_manager: jobject) -> Option<Self> {
+        let ptr = unsafe { ffi::AAssetManager_fromJava(env, asset_manager) };
+        Some(Self::from_ptr(NonNull::new(ptr)?))
     }
 
     /// Open the asset. Returns [`None`] if opening the asset fails.
